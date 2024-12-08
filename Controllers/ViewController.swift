@@ -22,6 +22,7 @@ class ViewController: UIViewController {
     lazy var searchTextField: UITextField = {
         let searchTextField = UITextField()
         searchTextField.layer.cornerRadius = 10
+        searchTextField.delegate = self
         searchTextField.clipsToBounds = true
         searchTextField.backgroundColor = UIColor.white
         searchTextField.placeholder = "Search..."
@@ -71,17 +72,40 @@ class ViewController: UIViewController {
         case .authorizedWhenInUse, .authorizedAlways:
             let region = MKCoordinateRegion(center: location.coordinate, latitudinalMeters: 750, longitudinalMeters: 750)
             mapView.setRegion(region, animated: true)
-        case .notDetermined:
-            print("")
-        case .restricted:
-            print("")
+        case .notDetermined, .restricted:
+            print("Location cannot be determined or restricted.")
         case .denied:
-            print("")
+            print("Location services has been denied.")
         @unknown default:
-            print("")
+            print("Unknown error. Unable to get location.")
         }
     }
+    
+    private func findNearbyPlaces(by query: String) {
+        
+        // clear all annotations
+        mapView.removeAnnotation(mapView.annotations)
+        
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = query
+        request.region = mapView.region
+        
+        let search = MKLocalSearch(request: request)
+        search.start { response, error in
+            guard let response = response, error == nil else { return }
+            print(response.mapItems)
+        }
+    }
+}
 
+extension ViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        let text = textField.text ?? ""
+        textField.resignFirstResponder()
+        
+        // find nearby places
+        findNearbyPlaces(by: text)
+    }
 }
 
 extension ViewController: CLLocationManagerDelegate {
