@@ -37,6 +37,12 @@ class PlacesTableViewController: UITableViewController {
         return meters.converted(to: .miles).formatted()
     }
     
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let place = places[indexPath.row]
+        let placeDetailVC = PlacesDetailViewController(place: place)
+        present(placeDetailVC, animated: true)
+    }
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         places.count
     }
